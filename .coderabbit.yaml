@@ -1,0 +1,37 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+reviews:
+  profile: chill
+  auto_review:
+    enabled: true
+    drafts: false
+  path_instructions:
+    - path: "generate-config.sh"
+      instructions: >-
+        envsubst must receive only the ${VAR} names extracted from each template,
+        so native variables such as $uri stay untouched. Unset variables (checked
+        with ${!name+x}) are warned about and fail under STRICT=true. Never remove
+        a non-empty output directory. DEBUG previews must keep redacting secrets.
+        Any new env var read here must be added to README.md.
+    - path: "Dockerfile"
+      instructions: >-
+        Keep bash and gettext installed (the script needs bash and envsubst) and
+        keep running as the non-root configgen user. /output must stay writable by
+        that user; /templates must work as a read-only mount.
+    - path: "{README.md,build.sh,examples/**}"
+      instructions: >-
+        Keep the image name config-generator:latest, the /templates (read-only) and
+        /output mounts, and the env var list (including STRICT) consistent across
+        README.md, build.sh, and examples/docker-compose.yml. SERVER_NAME and
+        LISTEN_PORT in Compose must match the ${VAR}s used in examples/templates.
+        build.sh must keep latest when adding an extra tag.
+    - path: ".github/workflows/docker-publish.yml"
+      instructions: >-
+        Pull requests must stay build-only: no registry login, push, or cosign
+        signing. Push to GHCR only from main and v*.*.* tags, and sign each
+        published tag by the build step's digest, not by tag alone.
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - "README.md"
